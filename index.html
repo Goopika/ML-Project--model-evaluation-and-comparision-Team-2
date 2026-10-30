@@ -1,0 +1,862 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Model Evaluation and Comparison System</title>
+
+    <style>
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            margin: 0;
+            font-family: Arial, sans-serif;
+            background: #f3f6fc;
+            color: #172b4d;
+        }
+
+        .sidebar {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 245px;
+            height: 100vh;
+            overflow-y: auto;
+            background: #142742;
+            color: white;
+            padding: 25px 16px;
+        }
+
+        .brand {
+            font-size: 21px;
+            font-weight: bold;
+            margin-bottom: 38px;
+        }
+
+        .nav {
+            display: block;
+            padding: 15px;
+            margin: 10px 0;
+            border-radius: 9px;
+            background: #294c80;
+            color: white;
+            text-decoration: none;
+        }
+
+        .nav:hover {
+            background: #316dff;
+        }
+
+        .main {
+            margin-left: 245px;
+            padding: 30px;
+        }
+
+        h1 {
+            margin-top: 0;
+            font-size: 30px;
+        }
+
+        .subtitle {
+            color: #687994;
+            margin-bottom: 25px;
+        }
+
+        .panel,
+        .metric {
+            background: white;
+            border-radius: 12px;
+            padding: 20px;
+            box-shadow: 0 3px 14px #172b4d0c;
+            margin-bottom: 22px;
+        }
+
+        .controls {
+            display: grid;
+            grid-template-columns: repeat(3, minmax(0, 1fr));
+            gap: 18px;
+            align-items: end;
+        }
+
+        label {
+            display: block;
+            font-weight: bold;
+            margin-bottom: 9px;
+        }
+
+        select,
+        input[type="file"],
+        button {
+            width: 100%;
+            padding: 13px;
+            border: 1px solid #d5deed;
+            border-radius: 8px;
+            font-size: 15px;
+            background: white;
+        }
+
+        button {
+            background: #316dff;
+            color: white;
+            border: none;
+            cursor: pointer;
+            font-weight: bold;
+        }
+
+        button:hover {
+            background: #2457d6;
+        }
+
+        button:disabled {
+            opacity: 0.6;
+            cursor: wait;
+        }
+
+        .metrics {
+            display: grid;
+            grid-template-columns: repeat(3, minmax(0, 1fr));
+            gap: 18px;
+            margin: 22px 0;
+        }
+
+        .metric p {
+            color: #65758b;
+            margin-bottom: 8px;
+        }
+
+        .metric h2 {
+            margin: 0;
+            font-size: 22px;
+            overflow-wrap: anywhere;
+        }
+
+        .model-list {
+            line-height: 2.2;
+            color: #425675;
+        }
+
+        .note {
+            background: #e8f0ff;
+            border-radius: 10px;
+            padding: 15px;
+            color: #294c80;
+            line-height: 1.6;
+        }
+
+        .message {
+            margin-top: 15px;
+            line-height: 1.6;
+            overflow-wrap: anywhere;
+        }
+
+        .table-wrap {
+            overflow-x: auto;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 12px;
+        }
+
+        th,
+        td {
+            padding: 12px;
+            border-bottom: 1px solid #e2e8f0;
+            text-align: left;
+        }
+
+        th {
+            background: #e8f0ff;
+        }
+
+        .upload-area {
+            border: 2px dashed #b8c9e6;
+            border-radius: 10px;
+            padding: 20px;
+            margin-bottom: 18px;
+            background: #f9fbff;
+        }
+
+        .small-text {
+            font-size: 13px;
+            color: #687994;
+            line-height: 1.6;
+        }
+
+        .chart-grid {
+            display: grid;
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+            gap: 18px;
+        }
+
+        .chart-card {
+            min-width: 0;
+            border: 1px solid #e3eaf5;
+            border-radius: 10px;
+            padding: 15px;
+            background: white;
+        }
+
+        .chart-card h3 {
+            margin-top: 0;
+            font-size: 17px;
+        }
+
+        .chart {
+            display: block;
+            width: 100%;
+            height: auto;
+            margin-top: 12px;
+        }
+
+        .hidden {
+            display: none !important;
+        }
+
+        footer {
+            margin-top: 30px;
+            color: #7a879b;
+            font-size: 13px;
+        }
+
+        @media (max-width: 900px) {
+            .sidebar {
+                position: static;
+                width: 100%;
+                height: auto;
+            }
+
+            .main {
+                margin-left: 0;
+                padding: 18px;
+            }
+
+            .controls,
+            .metrics,
+            .chart-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+<aside class="sidebar">
+    <div class="brand">📊 Model Evaluation</div>
+
+    <a class="nav" href="#home">⌂ &nbsp; Home</a>
+    <a class="nav" href="#dataset-panel">▤ &nbsp; Dataset Selection</a>
+    <a class="nav" href="#upload-panel">⬆ &nbsp; Upload Dataset</a>
+    <a class="nav" href="#evaluation">⚙ &nbsp; Model Evaluation</a>
+    <a class="nav" href="#results">▥ &nbsp; Results &amp; Visualizations</a>
+    <a class="nav" href="#about">ⓘ &nbsp; About Project</a>
+</aside>
+
+<main class="main" id="home">
+
+    <h1>Model Evaluation and Comparison System</h1>
+
+    <p class="subtitle">
+        Compare multiple Machine Learning models using built-in datasets
+        or your own uploaded files.
+    </p>
+
+    <section class="panel" id="dataset-panel">
+        <h2>Dataset Selection</h2>
+
+        <div class="controls">
+            <div>
+                <label for="dataset">Select Dataset</label>
+                <select id="dataset">
+                    <option value="Iris Flower">Iris Flower</option>
+                    <option value="Wine Classification">Wine Classification</option>
+                    <option value="Student Performance">Student Performance</option>
+                    <option value="Credit Card Fraud">Credit Card Fraud</option>
+                </select>
+            </div>
+
+            <div>
+                <label for="task">Task Type</label>
+                <select id="task">
+                    <option value="Classification">Classification</option>
+                    <option value="Regression">Regression</option>
+                </select>
+            </div>
+
+            <div>
+                <label for="split">Test Size</label>
+                <select id="split">
+                    <option value="20">20%</option>
+                    <option value="25" selected>25%</option>
+                    <option value="30">30%</option>
+                </select>
+            </div>
+        </div>
+
+        <br>
+
+        <button
+            type="button"
+            id="evaluateButton"
+            onclick="evaluateModels()"
+        >
+            Load Dataset &amp; Evaluate Models
+        </button>
+
+        <p class="small-text">
+            Regression is available for Student Performance among built-in
+            datasets. Uploaded datasets can use either task when the selected
+            target is suitable.
+        </p>
+    </section>
+
+    <section class="panel" id="upload-panel">
+        <h2>Upload Your Own Dataset</h2>
+
+        <p>
+            Upload a CSV or Excel file to evaluate and compare machine
+            learning models on your own data.
+        </p>
+
+        <div class="upload-area">
+            <label for="datasetFile">Choose Dataset File</label>
+
+            <input
+                type="file"
+                id="datasetFile"
+                accept=".csv,.xlsx,.xls"
+            >
+
+            <p class="small-text">
+                Supported formats: CSV, XLSX, XLS.
+                Maximum file size: 20 MB.
+            </p>
+
+            <button
+                type="button"
+                id="uploadButton"
+                onclick="uploadDataset()"
+            >
+                Upload Dataset
+            </button>
+
+            <p class="message" id="uploadMessage" role="status">
+                Select a file and click Upload Dataset.
+            </p>
+        </div>
+
+        <div id="uploadedDetails" class="hidden">
+            <div class="note" id="fileDetails"></div>
+
+            <br>
+
+            <div class="controls">
+                <div>
+                    <label for="targetColumn">
+                        Target Column to Predict
+                    </label>
+                    <select id="targetColumn"></select>
+                </div>
+
+                <div>
+                    <label for="uploadTask">Task Type</label>
+                    <select id="uploadTask">
+                        <option value="Classification">Classification</option>
+                        <option value="Regression">Regression</option>
+                    </select>
+                </div>
+
+                <div>
+                    <label for="uploadSplit">Test Size</label>
+                    <select id="uploadSplit">
+                        <option value="20">20%</option>
+                        <option value="25" selected>25%</option>
+                        <option value="30">30%</option>
+                    </select>
+                </div>
+            </div>
+
+            <br>
+
+            <button
+                type="button"
+                id="analyseUploadButton"
+                onclick="evaluateUploadedDataset()"
+            >
+                Analyse Uploaded Dataset
+            </button>
+
+            <p class="small-text">
+                Choose the column containing the answer you want the model
+                to predict. Other columns are used as features.
+            </p>
+        </div>
+    </section>
+
+    <p class="message" id="message" role="status">
+        Select a built-in dataset or upload your own file.
+    </p>
+
+    <section class="metrics">
+        <div class="metric">
+            <p>Project</p>
+            <h2>ML Evaluation</h2>
+        </div>
+
+        <div class="metric">
+            <p>Dataset Selected</p>
+            <h2 id="datasetName">Iris Flower</h2>
+        </div>
+
+        <div class="metric">
+            <p>Evaluation</p>
+            <h2 id="taskName">Classification</h2>
+        </div>
+    </section>
+
+    <section class="panel" id="evaluation">
+        <h2>Models Included</h2>
+
+        <p>
+            The system trains multiple algorithms and compares their
+            performance using suitable evaluation metrics.
+        </p>
+
+        <div id="modelList" class="model-list">
+            • Logistic Regression<br>
+            • Decision Tree<br>
+            • Random Forest<br>
+            • Support Vector Machine (SVM)<br>
+            • K-Nearest Neighbors (KNN)<br>
+            • Gradient Boosting
+        </div>
+
+        <div class="note">
+            Classification uses Accuracy, Precision, Recall and F1 Score.
+            Regression uses MAE, MSE, RMSE and R² Score.
+        </div>
+    </section>
+
+    <section class="panel hidden" id="results">
+        <h2>Model Evaluation Results</h2>
+
+        <p id="resultSummary"></p>
+
+        <div class="table-wrap">
+            <table>
+                <thead>
+                    <tr id="resultHeaders"></tr>
+                </thead>
+                <tbody id="resultRows"></tbody>
+            </table>
+        </div>
+
+        <h2 style="margin-top:28px">
+            Performance Comparison and Visualizations
+        </h2>
+
+        <div class="chart-grid">
+
+            <div class="chart-card hidden" id="comparisonCard">
+                <h3 id="comparisonTitle">Model Performance Comparison</h3>
+                <img id="comparisonChart" class="chart" alt="Model comparison graph">
+            </div>
+
+            <div class="chart-card hidden" id="classificationMetricsCard">
+                <h3>Precision, Recall and F1-Score Comparison</h3>
+                <img id="classificationMetricsChart" class="chart" alt="Classification metrics graph">
+            </div>
+
+            <div class="chart-card hidden" id="confusionCard">
+                <h3>Confusion Matrix</h3>
+                <img id="confusionChart" class="chart" alt="Confusion matrix">
+            </div>
+
+            <div class="chart-card hidden" id="regressionMetricsCard">
+                <h3>MAE and RMSE Comparison</h3>
+                <img id="regressionMetricsChart" class="chart" alt="Regression metrics graph">
+            </div>
+
+            <div class="chart-card hidden" id="actualPredictedCard">
+                <h3>Actual vs Predicted Values</h3>
+                <img id="actualPredictedChart" class="chart" alt="Actual versus predicted graph">
+            </div>
+
+            <div class="chart-card hidden" id="targetDistributionCard">
+                <h3>Target Distribution</h3>
+                <img id="targetDistributionChart" class="chart" alt="Target distribution graph">
+            </div>
+
+            <div class="chart-card hidden" id="featureDistributionCard">
+                <h3>Feature Distribution</h3>
+                <img id="featureDistributionChart" class="chart" alt="Feature distribution graph">
+            </div>
+
+        </div>
+
+        <p id="chartNote" class="small-text"></p>
+    </section>
+
+    <section class="panel" id="about">
+        <h2>About Project</h2>
+
+        <p>
+            The Model Evaluation and Comparison System compares machine
+            learning algorithms on built-in or user-uploaded datasets.
+            It displays evaluation metrics and visualizations to help
+            compare model performance.
+        </p>
+    </section>
+
+    <footer>
+        Machine Learning Project · Model Evaluation and Comparison System
+    </footer>
+
+</main>
+
+<script>
+    let currentUploadId = null;
+
+    // Regression is only available for Student Performance
+    // in the built-in dataset selector.
+    function updateBuiltInTaskOptions() {
+        const dataset = document.getElementById("dataset").value;
+        const task = document.getElementById("task");
+
+        const regressionOption = Array.from(task.options).find(
+            option => option.value === "Regression"
+        );
+
+        const allowRegression = dataset === "Student Performance";
+
+        regressionOption.hidden = !allowRegression;
+        regressionOption.disabled = !allowRegression;
+
+        if (!allowRegression && task.value === "Regression") {
+            task.value = "Classification";
+        }
+
+        updateModelList(task.value);
+    }
+
+    function updateModelList(task) {
+        const list = document.getElementById("modelList");
+
+        if (task === "Regression") {
+            list.innerHTML =
+                "• Linear Regression<br>" +
+                "• Decision Tree Regressor<br>" +
+                "• Random Forest Regressor<br>" +
+                "• Gradient Boosting Regressor";
+        } else {
+            list.innerHTML =
+                "• Logistic Regression<br>" +
+                "• Decision Tree<br>" +
+                "• Random Forest<br>" +
+                "• Support Vector Machine (SVM)<br>" +
+                "• K-Nearest Neighbors (KNN)<br>" +
+                "• Gradient Boosting";
+        }
+    }
+
+    document.getElementById("dataset").addEventListener(
+        "change",
+        updateBuiltInTaskOptions
+    );
+
+    document.getElementById("task").addEventListener(
+        "change",
+        function () {
+            updateModelList(this.value);
+        }
+    );
+
+    updateBuiltInTaskOptions();
+
+
+    // Upload a CSV or Excel dataset.
+    async function uploadDataset() {
+        const fileInput = document.getElementById("datasetFile");
+        const button = document.getElementById("uploadButton");
+        const message = document.getElementById("uploadMessage");
+        const file = fileInput.files[0];
+
+        if (!file) {
+            message.textContent =
+                "Please choose a dataset file first.";
+            return;
+        }
+
+        const allowed = [".csv", ".xlsx", ".xls"];
+
+        if (!allowed.some(ext =>
+            file.name.toLowerCase().endsWith(ext)
+        )) {
+            message.textContent =
+                "Select a CSV, XLSX or XLS file.";
+            return;
+        }
+
+        if (file.size > 20 * 1024 * 1024) {
+            message.textContent =
+                "Maximum file size is 20 MB.";
+            return;
+        }
+
+        button.disabled = true;
+        button.textContent = "Uploading...";
+        message.textContent = "Reading your dataset...";
+
+        try {
+            const formData = new FormData();
+            formData.append("file", file);
+
+            const response = await fetch("/api/upload", {
+                method: "POST",
+                body: formData
+            });
+
+            const data = await response.json();
+
+            if (!response.ok) {
+                throw new Error(data.error || "Upload failed.");
+            }
+
+            currentUploadId = data.upload_id;
+
+            const target = document.getElementById("targetColumn");
+            target.replaceChildren();
+
+            data.columns.forEach(column => {
+                const option = document.createElement("option");
+                option.value = column;
+                option.textContent = column;
+                target.appendChild(option);
+            });
+
+            document.getElementById("fileDetails").textContent =
+                "File: " + data.filename +
+                " | Rows: " + data.rows +
+                " | Columns: " + data.columns.length;
+
+            document.getElementById("uploadedDetails")
+                .classList.remove("hidden");
+
+            message.textContent =
+                "Dataset uploaded successfully. Choose the target column.";
+
+            document.getElementById("datasetName").textContent =
+                data.filename;
+
+        } catch (error) {
+            currentUploadId = null;
+            message.textContent = "Upload error: " + error.message;
+
+        } finally {
+            button.disabled = false;
+            button.textContent = "Upload Dataset";
+        }
+    }
+
+
+    // Run a built-in dataset.
+    async function evaluateModels() {
+        await runEvaluation({
+            dataset: document.getElementById("dataset").value,
+            task: document.getElementById("task").value,
+            test_size:
+                Number(document.getElementById("split").value) / 100
+        });
+    }
+
+
+    // Run an uploaded dataset.
+    async function evaluateUploadedDataset() {
+        if (!currentUploadId) {
+            document.getElementById("uploadMessage").textContent =
+                "Please upload a dataset first.";
+            return;
+        }
+
+        await runEvaluation({
+            upload_id: currentUploadId,
+            target_column:
+                document.getElementById("targetColumn").value,
+            task: document.getElementById("uploadTask").value,
+            test_size:
+                Number(document.getElementById("uploadSplit").value) / 100
+        });
+    }
+
+
+    // Send the selected task to Flask and display the response.
+    async function runEvaluation(payload) {
+        const message = document.getElementById("message");
+        const builtButton = document.getElementById("evaluateButton");
+        const uploadButton = document.getElementById("analyseUploadButton");
+
+        builtButton.disabled = true;
+        uploadButton.disabled = true;
+
+        message.textContent =
+            "Training and comparing models. Please wait...";
+
+        document.getElementById("results").classList.add("hidden");
+
+        document.getElementById("datasetName").textContent =
+            payload.dataset || "Uploaded Dataset";
+
+        document.getElementById("taskName").textContent = payload.task;
+
+        try {
+            const response = await fetch("/api/evaluate", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json"
+                },
+                body: JSON.stringify(payload)
+            });
+
+            const data = await response.json();
+
+            if (!response.ok) {
+                throw new Error(data.error || "Evaluation failed.");
+            }
+
+            displayResults(data);
+
+            document.getElementById("datasetName").textContent =
+                data.dataset || payload.dataset || "Uploaded Dataset";
+
+            message.textContent =
+                "Evaluation completed successfully!";
+
+        } catch (error) {
+            message.textContent =
+                "Could not evaluate models: " + error.message;
+
+        } finally {
+            builtButton.disabled = false;
+            uploadButton.disabled = false;
+        }
+    }
+
+
+    // Populate the results table and show the applicable graphs.
+    function displayResults(data) {
+        const headers = document.getElementById("resultHeaders");
+        const rows = document.getElementById("resultRows");
+
+        headers.replaceChildren();
+        rows.replaceChildren();
+
+        ["Model", ...(data.metrics || [])].forEach(name => {
+            const th = document.createElement("th");
+            th.textContent = name;
+            headers.appendChild(th);
+        });
+
+        (data.results || []).forEach(item => {
+            const tr = document.createElement("tr");
+
+            const modelCell = document.createElement("td");
+            modelCell.textContent = item.model;
+            tr.appendChild(modelCell);
+
+            (data.metrics || []).forEach(metric => {
+                const td = document.createElement("td");
+                const value = item[metric];
+
+                td.textContent =
+                    typeof value === "number"
+                        ? value.toFixed(4)
+                        : (value ?? "N/A");
+
+                tr.appendChild(td);
+            });
+
+            rows.appendChild(tr);
+        });
+
+        document.getElementById("resultSummary").textContent =
+            data.summary || "Model evaluation completed.";
+
+        document.getElementById("comparisonTitle").textContent =
+            data.task === "Regression"
+                ? "R² Score Comparison"
+                : "Accuracy Comparison";
+
+        setGraph(
+            "comparisonCard",
+            "comparisonChart",
+            data.comparison_chart
+        );
+
+        setGraph(
+            "classificationMetricsCard",
+            "classificationMetricsChart",
+            data.classification_metrics_chart
+        );
+
+        setGraph(
+            "confusionCard",
+            "confusionChart",
+            data.confusion_matrix
+        );
+
+        setGraph(
+            "regressionMetricsCard",
+            "regressionMetricsChart",
+            data.regression_metrics_chart
+        );
+
+        setGraph(
+            "actualPredictedCard",
+            "actualPredictedChart",
+            data.actual_vs_predicted_chart
+        );
+
+        setGraph(
+            "targetDistributionCard",
+            "targetDistributionChart",
+            data.target_distribution_chart
+        );
+
+        setGraph(
+            "featureDistributionCard",
+            "featureDistributionChart",
+            data.feature_distribution_chart
+        );
+
+        document.getElementById("chartNote").textContent =
+            data.chart_note || "";
+
+        document.getElementById("results").classList.remove("hidden");
+
+        document.getElementById("results").scrollIntoView({
+            behavior: "smooth"
+        });
+    }
+
+
+    // Show a graph only when the backend returned an image URL.
+    function setGraph(cardId, imageId, imageUrl) {
+        const card = document.getElementById(cardId);
+        const image = document.getElementById(imageId);
+
+        if (imageUrl) {
+            image.src = imageUrl;
+            card.classList.remove("hidden");
+        } else {
+            image.removeAttribute("src");
+            card.classList.add("hidden");
+        }
+    }
+</script>
+
+</body>
+</html>
